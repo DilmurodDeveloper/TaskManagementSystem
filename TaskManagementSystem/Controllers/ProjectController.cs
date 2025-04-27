@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using TaskManagementSystem.DTOs;
 using TaskManagementSystem.Entities;
 using TaskManagementSystem.Services;
 
@@ -9,49 +11,60 @@ namespace TaskManagementSystem.Controllers
     public class ProjectController : ControllerBase
     {
         private readonly IProjectService _projectService;
+        private readonly IMapper _mapper;
 
-        public ProjectController(IProjectService projectService)
+        public ProjectController(IProjectService projectService, IMapper mapper)
         {
             _projectService = projectService;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var projects = await _projectService.GetAllProjectsAsync();
-            return Ok(projects);
+            var projectDtos = _mapper.Map<IEnumerable<ProjectDto>>(projects);
+            return Ok(projectDtos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var project = await _projectService.GetProjectByIdAsync(id);
-            if (project == null)
-                return NotFound();
-
-            return Ok(project);
+            if (project == null) return NotFound();
+            var projectDto = _mapper.Map<ProjectDto>(project);
+            return Ok(projectDto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Project project)
+        public async Task<IActionResult> Create([FromBody] CreateProjectDto createDto)
         {
-            var createdProject = await _projectService.AddProjectAsync(project);
-            return CreatedAtAction(nameof(GetById), new { id = createdProject.Id }, createdProject);
+            var projectEntity = _mapper.Map<Project>(createDto);
+            var created = await _projectService.AddProjectAsync(projectEntity);
+            var projectDto = _mapper.Map<ProjectDto>(created);
+            return CreatedAtAction(nameof(GetById), new { id = projectDto.Id }, projectDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Project project)
+        public async Task<IActionResult> Update(int id, [FromBody] CreateProjectDto updateDto)
         {
-            if (id != project.Id)
-                return BadRequest("ID mos emas!");
+            var project = await _projectService.GetProjectByIdAsync(id);
+            if (project == null) return NotFound();
 
+            _mapper.Map(updateDto, project);
+            project.Id = id;
             await _projectService.UpdateProjectAsync(project);
-            return NoContent();
+
+            var projectDto = _mapper.Map<ProjectDto>(project);
+            return Ok(projectDto);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var project = await _projectService.GetProjectByIdAsync(id);
+            if (project == null) return NotFound();
+
             await _projectService.DeleteProjectAsync(id);
             return NoContent();
         }
