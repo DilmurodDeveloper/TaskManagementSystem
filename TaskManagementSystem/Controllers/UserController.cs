@@ -1,78 +1,58 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TaskManagementSystem.Data;
 using TaskManagementSystem.Entities;
+using TaskManagementSystem.Services;
 
 namespace TaskManagementSystem.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        public UserController(ApplicationDbContext context)
-            => _context = context;
+        private readonly IUserService _userService;
 
-        // CREATE
-        [HttpPost]
-        public async Task<IActionResult> Create(User user)
+        public UserController(IUserService userService)
         {
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+            _userService = userService;
         }
 
-        // READ all (with Projects)
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var users = await _context.Users
-                .Include(u => u.Projects)
-                .ToListAsync();
+            var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
 
-        // READ by id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var user = await _context.Users
-                .Include(u => u.Projects)
-                .FirstOrDefaultAsync(u => u.Id == id);
-
+            var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
                 return NotFound();
 
             return Ok(user);
         }
 
-        // UPDATE
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, User updatedUser)
+        [HttpPost]
+        public async Task<IActionResult> Create(User user)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-                return NotFound();
-
-            user.Username = updatedUser.Username;
-            user.Email = updatedUser.Email;
-            user.PasswordHash = updatedUser.PasswordHash;
-            user.Role = updatedUser.Role;
-
-            await _context.SaveChangesAsync();
-            return Ok(user);
+            var createdUser = await _userService.AddUserAsync(user);
+            return CreatedAtAction(nameof(GetById), new { id = createdUser.Id }, createdUser);
         }
 
-        // DELETE
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, User user)
+        {
+            if (id != user.Id)
+                return BadRequest("ID mos emas!");
+
+            await _userService.UpdateUserAsync(user);
+            return NoContent();
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-                return NotFound();
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            await _userService.DeleteUserAsync(id);
             return NoContent();
         }
     }

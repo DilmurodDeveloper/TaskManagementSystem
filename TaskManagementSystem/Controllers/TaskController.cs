@@ -1,82 +1,58 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TaskManagementSystem.Data;
 using TaskManagementSystem.Entities;
+using TaskManagementSystem.Services;
 
 namespace TaskManagementSystem.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class TaskController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ITaskService _taskService;
 
-        public TaskController(ApplicationDbContext context)
+        public TaskController(ITaskService taskService)
         {
-            _context = context;
+            _taskService = taskService;
         }
 
-        // CREATE
-        [HttpPost]
-        public async Task<IActionResult> Create(TaskEntity task)
-        {
-            await _context.Tasks.AddAsync(task);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
-        }
-
-        // READ all (with related Project)
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var tasks = await _context.Tasks
-                .Include(t => t.Project)
-                .ToListAsync();
+            var tasks = await _taskService.GetAllTasksAsync();
             return Ok(tasks);
         }
 
-        // READ by id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var task = await _context.Tasks
-                .Include(t => t.Project)
-                .FirstOrDefaultAsync(t => t.Id == id);
-
+            var task = await _taskService.GetTaskByIdAsync(id);
             if (task == null)
                 return NotFound();
 
             return Ok(task);
         }
 
-        // UPDATE
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, TaskEntity updatedTask)
+        [HttpPost]
+        public async Task<IActionResult> Create(TaskEntity task)
         {
-            var task = await _context.Tasks.FindAsync(id);
-            if (task == null)
-                return NotFound();
-
-            task.Title = updatedTask.Title;
-            task.Description = updatedTask.Description;
-            task.DueDate = updatedTask.DueDate;
-            task.IsCompleted = updatedTask.IsCompleted;
-            task.ProjectId = updatedTask.ProjectId;
-
-            await _context.SaveChangesAsync();
-            return Ok(task);
+            var createdTask = await _taskService.AddTaskAsync(task);
+            return CreatedAtAction(nameof(GetById), new { id = createdTask.Id }, createdTask);
         }
 
-        // DELETE
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, TaskEntity task)
+        {
+            if (id != task.Id)
+                return BadRequest("ID mos emas!");
+
+            await _taskService.UpdateTaskAsync(task);
+            return NoContent();
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var task = await _context.Tasks.FindAsync(id);
-            if (task == null)
-                return NotFound();
-
-            _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
+            await _taskService.DeleteTaskAsync(id);
             return NoContent();
         }
     }
