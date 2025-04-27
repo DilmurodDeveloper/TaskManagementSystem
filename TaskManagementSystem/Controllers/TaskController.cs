@@ -1,6 +1,15 @@
-﻿namespace TaskManagementSystem.Controllers
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace TaskManagementSystem.Controllers
 {
-    public class TaskController
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TaskController : ControllerBase
     {
+        [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok("Task list");
+        }
     }
 }
