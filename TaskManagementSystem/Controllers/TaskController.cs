@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementSystem.DTOs;
@@ -10,6 +11,7 @@ namespace TaskManagementSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TaskController : ControllerBase
     {
         private readonly ITaskService _taskService;
