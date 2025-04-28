@@ -5,10 +5,8 @@ using TaskManagementSystem.DTOs;
 using TaskManagementSystem.Entities;
 using TaskManagementSystem.Services;
 using Microsoft.AspNetCore.Mvc;
-using Xunit;
 using FluentAssertions;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace TaskManagementSystem.UnitTests.Controllers
 {
@@ -16,13 +14,15 @@ namespace TaskManagementSystem.UnitTests.Controllers
     {
         private readonly Mock<IUserService> _userServiceMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<UserController>> _loggerMock; 
         private readonly UserController _controller;
 
         public UserControllerTests()
         {
             _userServiceMock = new Mock<IUserService>();
             _mapperMock = new Mock<IMapper>();
-            _controller = new UserController(_userServiceMock.Object, _mapperMock.Object);
+            _loggerMock = new Mock<ILogger<UserController>>(); 
+            _controller = new UserController(_userServiceMock.Object, _mapperMock.Object, _loggerMock.Object); 
         }
 
         [Fact]
