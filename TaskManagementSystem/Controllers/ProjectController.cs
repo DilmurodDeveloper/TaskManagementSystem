@@ -32,6 +32,7 @@ namespace TaskManagementSystem.Controllers
         {
             var project = await _projectService.GetProjectByIdAsync(id);
             if (project == null) return NotFound();
+
             var projectDto = _mapper.Map<ProjectDto>(project);
             return Ok(projectDto);
         }
@@ -39,6 +40,9 @@ namespace TaskManagementSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProjectDto createDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var projectEntity = _mapper.Map<Project>(createDto);
             var created = await _projectService.AddProjectAsync(projectEntity);
             var projectDto = _mapper.Map<ProjectDto>(created);
@@ -48,6 +52,9 @@ namespace TaskManagementSystem.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] CreateProjectDto updateDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var project = await _projectService.GetProjectByIdAsync(id);
             if (project == null) return NotFound();
 

@@ -24,7 +24,7 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsersAsync();
-            var userDtos = _mapper.Map<IEnumerable<UserDto>>(users); 
+            var userDtos = _mapper.Map<IEnumerable<UserDto>>(users);
             return Ok(userDtos);
         }
 
@@ -36,7 +36,7 @@ namespace TaskManagementSystem.Controllers
             if (user == null)
                 return NotFound();
 
-            var userDto = _mapper.Map<UserDto>(user); 
+            var userDto = _mapper.Map<UserDto>(user);
             return Ok(userDto);
         }
 
@@ -44,9 +44,12 @@ namespace TaskManagementSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUserDto createUserDto)
         {
-            var user = _mapper.Map<User>(createUserDto); 
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = _mapper.Map<User>(createUserDto);
             var createdUser = await _userService.AddUserAsync(user);
-            var userDto = _mapper.Map<UserDto>(createdUser); 
+            var userDto = _mapper.Map<UserDto>(createdUser);
             return CreatedAtAction(nameof(GetById), new { id = userDto.Id }, userDto);
         }
 
@@ -54,6 +57,9 @@ namespace TaskManagementSystem.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto updateUserDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             if (id != updateUserDto.Id)
                 return BadRequest("ID mos emas!");
 
@@ -61,9 +67,10 @@ namespace TaskManagementSystem.Controllers
             if (user == null)
                 return NotFound();
 
-            _mapper.Map(updateUserDto, user); 
+            _mapper.Map(updateUserDto, user);
             await _userService.UpdateUserAsync(user);
-            var updatedUserDto = _mapper.Map<UserDto>(user); 
+
+            var updatedUserDto = _mapper.Map<UserDto>(user);
             return Ok(updatedUserDto);
         }
 
