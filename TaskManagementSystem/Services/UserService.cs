@@ -20,6 +20,12 @@ namespace TaskManagementSystem.Services
         public async Task<User?> GetUserByIdAsync(int id) =>
             await _userRepository.GetByIdAsync(id);
 
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            var users = await _userRepository.GetAllAsync();
+            return users.FirstOrDefault(u => u.Username == username);
+        }
+
         public async Task<User> AddUserAsync(User user) =>
             await _userRepository.AddAsync(user);
 
