@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementSystem.DTOs;
 using TaskManagementSystem.Entities;
+using TaskManagementSystem.Exceptions;
 using TaskManagementSystem.Services;
 
 namespace TaskManagementSystem.Controllers
@@ -31,7 +33,8 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var task = await _taskService.GetTaskByIdAsync(id);
-            if (task == null) return NotFound();
+            if (task == null)
+                throw new CustomException("Vazifa topilmadi", StatusCodes.Status404NotFound);
 
             var taskDto = _mapper.Map<TaskDto>(task);
             return Ok(taskDto);
@@ -41,7 +44,7 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> Create([FromBody] CreateTaskDto createDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                throw new CustomException("Ma'lumotlar to‘g‘ri emas", StatusCodes.Status400BadRequest);
 
             var taskEntity = _mapper.Map<TaskEntity>(createDto);
             var created = await _taskService.AddTaskAsync(taskEntity);
@@ -53,10 +56,11 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] CreateTaskDto updateDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                throw new CustomException("Ma'lumotlar to‘g‘ri emas", StatusCodes.Status400BadRequest);
 
             var task = await _taskService.GetTaskByIdAsync(id);
-            if (task == null) return NotFound();
+            if (task == null)
+                throw new CustomException("Vazifa topilmadi", StatusCodes.Status404NotFound);
 
             _mapper.Map(updateDto, task);
             task.Id = id;
@@ -70,7 +74,8 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var task = await _taskService.GetTaskByIdAsync(id);
-            if (task == null) return NotFound();
+            if (task == null)
+                throw new CustomException("Vazifa topilmadi", StatusCodes.Status404NotFound);
 
             await _taskService.DeleteTaskAsync(id);
             return NoContent();

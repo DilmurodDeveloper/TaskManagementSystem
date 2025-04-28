@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementSystem.DTOs;
 using TaskManagementSystem.Entities;
+using TaskManagementSystem.Exceptions;
 using TaskManagementSystem.Services;
 
 namespace TaskManagementSystem.Controllers
@@ -34,7 +36,7 @@ namespace TaskManagementSystem.Controllers
         {
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
-                return NotFound();
+                throw new CustomException("Foydalanuvchi topilmadi", StatusCodes.Status404NotFound);
 
             var userDto = _mapper.Map<UserDto>(user);
             return Ok(userDto);
@@ -45,7 +47,7 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> Create([FromBody] CreateUserDto createUserDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                throw new CustomException("Ma'lumotlar to‘g‘ri emas", StatusCodes.Status400BadRequest);
 
             var user = _mapper.Map<User>(createUserDto);
             var createdUser = await _userService.AddUserAsync(user);
@@ -58,14 +60,14 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto updateUserDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                throw new CustomException("Ma'lumotlar to‘g‘ri emas", StatusCodes.Status400BadRequest);
 
             if (id != updateUserDto.Id)
-                return BadRequest("ID mos emas!");
+                throw new CustomException("ID mos emas", StatusCodes.Status400BadRequest);
 
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
-                return NotFound();
+                throw new CustomException("Foydalanuvchi topilmadi", StatusCodes.Status404NotFound);
 
             _mapper.Map(updateUserDto, user);
             await _userService.UpdateUserAsync(user);
@@ -80,7 +82,7 @@ namespace TaskManagementSystem.Controllers
         {
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
-                return NotFound();
+                throw new CustomException("Foydalanuvchi topilmadi", StatusCodes.Status404NotFound);
 
             await _userService.DeleteUserAsync(id);
             return NoContent();

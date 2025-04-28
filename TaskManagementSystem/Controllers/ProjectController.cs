@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementSystem.DTOs;
 using TaskManagementSystem.Entities;
+using TaskManagementSystem.Exceptions;
 using TaskManagementSystem.Services;
 
 namespace TaskManagementSystem.Controllers
@@ -31,7 +33,8 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var project = await _projectService.GetProjectByIdAsync(id);
-            if (project == null) return NotFound();
+            if (project == null)
+                throw new CustomException("Loyiha topilmadi", StatusCodes.Status404NotFound);
 
             var projectDto = _mapper.Map<ProjectDto>(project);
             return Ok(projectDto);
@@ -41,7 +44,7 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> Create([FromBody] CreateProjectDto createDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                throw new CustomException("Ma'lumotlar to‘g‘ri emas", StatusCodes.Status400BadRequest);
 
             var projectEntity = _mapper.Map<Project>(createDto);
             var created = await _projectService.AddProjectAsync(projectEntity);
@@ -53,10 +56,11 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] CreateProjectDto updateDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                throw new CustomException("Ma'lumotlar to‘g‘ri emas", StatusCodes.Status400BadRequest);
 
             var project = await _projectService.GetProjectByIdAsync(id);
-            if (project == null) return NotFound();
+            if (project == null)
+                throw new CustomException("Loyiha topilmadi", StatusCodes.Status404NotFound);
 
             _mapper.Map(updateDto, project);
             project.Id = id;
@@ -70,7 +74,8 @@ namespace TaskManagementSystem.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var project = await _projectService.GetProjectByIdAsync(id);
-            if (project == null) return NotFound();
+            if (project == null)
+                throw new CustomException("Loyiha topilmadi", StatusCodes.Status404NotFound);
 
             await _projectService.DeleteProjectAsync(id);
             return NoContent();
