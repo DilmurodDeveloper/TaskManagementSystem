@@ -68,25 +68,33 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services
-  .AddAuthentication(options =>
-  {
-      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-  })
-  .AddJwtBearer(options =>
-  {
-      options.TokenValidationParameters = new TokenValidationParameters
-      {
-          ValidateIssuer = true,
-          ValidateAudience = true,
-          ValidateLifetime = true,
-          ValidateIssuerSigningKey = true,
-          ValidIssuer = builder.Configuration["Jwt:Issuer"],
-          ValidAudience = builder.Configuration["Jwt:Audience"],
-          IssuerSigningKey = new SymmetricSecurityKey(
-                                     Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-      };
-  });
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        var issuer = builder.Configuration["Jwt:Issuer"];
+        var audience = builder.Configuration["Jwt:Audience"];
+        var key = builder.Configuration["Jwt:Key"];
+
+        if (string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience) || string.IsNullOrEmpty(key))
+        {
+            throw new ArgumentNullException("JWT konfiguratsiyasi noto'g'ri: Issuer, Audience yoki Key mavjud emas.");
+        }
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+        };
+    });
 
 var app = builder.Build();
 

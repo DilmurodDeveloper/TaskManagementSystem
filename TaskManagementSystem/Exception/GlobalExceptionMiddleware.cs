@@ -22,13 +22,14 @@ namespace TaskManagementSystem.Middleware
             }
             catch (CustomException ex)
             {
-                _logger.LogError($"Custom Exception: {ex.Message}");
+                _logger.LogError(ex, "Custom exception occurred: {Message}", ex.Message);
                 await HandleExceptionAsync(httpContext, ex);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"An unexpected error occurred: {ex.Message}");
-                await HandleExceptionAsync(httpContext, new CustomException("An unexpected error occurred.", (int)HttpStatusCode.InternalServerError));
+                _logger.LogError(ex, "An unexpected error occurred.");
+                var customEx = new CustomException("An unexpected error occurred.", (int)HttpStatusCode.InternalServerError);
+                await HandleExceptionAsync(httpContext, customEx);
             }
         }
 
@@ -37,7 +38,12 @@ namespace TaskManagementSystem.Middleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = exception.StatusCode;
 
-            var response = new ErrorResponse(exception.StatusCode, exception.Message);
+            var response = new ErrorResponse(
+                exception.StatusCode, 
+                exception.Message, 
+                exception.InnerException?.Message
+            );
+
             return context.Response.WriteAsJsonAsync(response);
         }
     }
