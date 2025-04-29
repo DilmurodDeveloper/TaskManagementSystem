@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementSystem.DTOs;
 using TaskManagementSystem.Entities;
@@ -20,6 +21,25 @@ namespace TaskManagementSystem.Controllers
             _userService = userService;
             _mapper = mapper;
             _logger = logger;
+        }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var userDto = _mapper.Map<UserDto>(user);
+            return Ok(userDto);
         }
 
         [HttpGet]

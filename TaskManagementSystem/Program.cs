@@ -92,10 +92,14 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        builder => builder.WithOrigins("http://localhost:3000") 
+    options.AddPolicy("AllowFrontend", builder =>
+    { 
+        builder
+            .WithOrigins("http://localhost:3002")
             .AllowAnyMethod()
-            .AllowAnyHeader());
+            .AllowAnyHeader()
+            .AllowCredentials(); 
+    }); 
 });
 
 var app = builder.Build();
@@ -109,11 +113,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowFrontend");
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors("AllowFrontend");
-
 app.MapControllers();
 app.Run();
