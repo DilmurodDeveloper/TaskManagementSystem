@@ -6,10 +6,10 @@ namespace TaskManagementSystem.DTOs
     {
         [Required(ErrorMessage = "Vazifa nomi majburiy")]
         [StringLength(100, ErrorMessage = "Vazifa nomi 100 belgidan oshmasligi kerak")]
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
         [StringLength(500, ErrorMessage = "Tavsif 500 belgidan oshmasligi kerak")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Required(ErrorMessage = "Muddat majburiy")]
         public DateTime DueDate { get; set; }

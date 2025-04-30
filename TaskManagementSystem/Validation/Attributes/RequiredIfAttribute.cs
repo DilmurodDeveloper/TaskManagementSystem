@@ -11,7 +11,7 @@ public class RequiredIfAttribute : ValidationAttribute
         _targetValue = targetValue;
     }
 
-    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext) // Return turini nullable qilib belgilaymiz
     {
         var dependentProperty = validationContext.ObjectType.GetProperty(_dependentProperty);
         if (dependentProperty == null)

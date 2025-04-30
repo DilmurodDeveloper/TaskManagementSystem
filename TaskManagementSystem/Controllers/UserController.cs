@@ -60,7 +60,7 @@ namespace TaskManagementSystem.Controllers
             if (user == null)
             {
                 _logger.LogWarning("User not found with id: {UserId}", id);
-                throw new CustomException("Foydalanuvchi topilmadi", StatusCodes.Status404NotFound);
+                return NotFound();
             }
 
             var userDto = _mapper.Map<UserDto>(user);
@@ -73,7 +73,7 @@ namespace TaskManagementSystem.Controllers
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning("Invalid CreateUserDto model: {@ModelState}", ModelState);
-                throw new CustomException("Ma'lumotlar to‘g‘ri emas", StatusCodes.Status400BadRequest);
+                return BadRequest(ModelState);
             }
 
             _logger.LogInformation("Creating a new user: {@CreateUserDto}", createUserDto);
@@ -90,21 +90,20 @@ namespace TaskManagementSystem.Controllers
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning("Invalid UpdateUserDto model: {@ModelState}", ModelState);
-                throw new CustomException("Ma'lumotlar to‘g‘ri emas", StatusCodes.Status400BadRequest);
+                return BadRequest(ModelState);
             }
 
             if (id != updateUserDto.Id)
             {
                 _logger.LogWarning("Update ID mismatch: RouteId={RouteId}, BodyId={BodyId}", id, updateUserDto.Id);
-                throw new CustomException("ID mos emas", StatusCodes.Status400BadRequest);
+                return BadRequest("ID mismatch between route and body.");
             }
 
-            _logger.LogInformation("Updating user with id: {UserId}", id);
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
             {
                 _logger.LogWarning("User not found for update with id: {UserId}", id);
-                throw new CustomException("Foydalanuvchi topilmadi", StatusCodes.Status404NotFound);
+                return NotFound("User not found for update.");
             }
 
             _mapper.Map(updateUserDto, user);
@@ -123,7 +122,7 @@ namespace TaskManagementSystem.Controllers
             if (user == null)
             {
                 _logger.LogWarning("User not found for deletion with id: {UserId}", id);
-                throw new CustomException("Foydalanuvchi topilmadi", StatusCodes.Status404NotFound);
+                return NotFound();  
             }
 
             await _userService.DeleteUserAsync(id);

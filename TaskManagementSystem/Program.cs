@@ -24,7 +24,14 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Task Management API", Version = "v1" });
+    c.SwaggerDoc(
+        "v1",
+        new OpenApiInfo
+        {
+            Title = "Task Management API",
+            Version = "v1",
+            Description = "API for managing tasks and projects"
+        });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -52,7 +59,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserService, UserService>();
@@ -73,9 +81,12 @@ builder.Services.AddAuthentication(options =>
     var audience = builder.Configuration["Jwt:Audience"];
     var key = builder.Configuration["Jwt:Key"];
 
-    if (string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience) || string.IsNullOrEmpty(key))
+    if (string.IsNullOrEmpty(issuer) || 
+        string.IsNullOrEmpty(audience) || 
+        string.IsNullOrEmpty(key))
     {
-        throw new ArgumentNullException("JWT konfiguratsiyasi noto'g'ri: Issuer, Audience yoki Key mavjud emas.");
+        throw new ArgumentNullException(
+            "JWT konfiguratsiyasi noto'g'ri: Issuer, Audience yoki Key mavjud emas.");
     }
 
     options.TokenValidationParameters = new TokenValidationParameters
@@ -93,13 +104,13 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", builder =>
-    { 
+    {
         builder
-            .WithOrigins("http://localhost:3002")
+            .WithOrigins("http://localhost:3000")  
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials(); 
-    }); 
+            .AllowCredentials();
+    });
 });
 
 var app = builder.Build();
@@ -110,13 +121,19 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Task Management API v1");  
+    });
 }
 
 app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();

@@ -29,8 +29,10 @@ namespace TaskManagementSystem.Services
             {
                 Username = registerDto.Username,
                 Email = registerDto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password) // <-- Password Hash qilish
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
+                Projects = new List<Project>() 
             };
+
 
             await _userService.AddUserAsync(newUser);
             return (true, "Ro'yxatdan muvaffaqiyatli o'tildi!");
@@ -49,7 +51,11 @@ namespace TaskManagementSystem.Services
                 new Claim(ClaimTypes.Email, user.Email)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key topilmadi")
+                    ));
+
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var jwtToken = new JwtSecurityToken(
