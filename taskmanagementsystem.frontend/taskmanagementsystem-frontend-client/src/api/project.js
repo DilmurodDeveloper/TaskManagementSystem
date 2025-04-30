@@ -1,12 +1,22 @@
-import axios from 'axios';
+import axiosInstance from './axiosInstance';
 
-const API_URL = 'https://localhost:7212/api/Project'; 
+const BASE = '/Project';
 
 export const getProjects = async () => {
-    try {
-        const response = await axios.get(API_URL); 
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await axiosInstance.get(BASE);
+    return response.data;
+};
+
+export const createProject = async (projectData) => {
+    const response = await axiosInstance.post(BASE, projectData);
+    return response.data;
+};
+
+export const updateProject = async (id, projectData) => {
+    const response = await axiosInstance.put(`${BASE}/${id}`, projectData);
+    return response.data;
+};
+
+export const deleteProject = async (id) => {
+    await axiosInstance.delete(`${BASE}/${id}`);
 };
