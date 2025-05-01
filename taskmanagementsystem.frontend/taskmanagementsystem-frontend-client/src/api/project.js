@@ -1,22 +1,25 @@
-import axiosInstance from './axiosInstance';
+import axios from "axios";
 
-const BASE = '/Project';
+const API_URL = process.env.REACT_APP_API_URL;
 
-export const getProjects = async () => {
-    const response = await axiosInstance.get(BASE);
+export const getProjects = async (token) => {
+    const response = await axios.get("/api/Project", {
+        baseURL: API_URL,
+        headers: { Authorization: `Bearer ${token}` }
+    });
     return response.data;
 };
 
-export const createProject = async (projectData) => {
-    const response = await axiosInstance.post(BASE, projectData);
-    return response.data;
+export const createProject = async (project, token) => {
+    await axios.post("/api/Project", project, {
+        baseURL: API_URL,
+        headers: { Authorization: `Bearer ${token}` }
+    });
 };
 
-export const updateProject = async (id, projectData) => {
-    const response = await axiosInstance.put(`${BASE}/${id}`, projectData);
-    return response.data;
-};
-
-export const deleteProject = async (id) => {
-    await axiosInstance.delete(`${BASE}/${id}`);
+export const deleteProject = async (id, token) => {
+    await axios.delete(`/api/Project/${id}`, {
+        baseURL: API_URL,
+        headers: { Authorization: `Bearer ${token}` }
+    });
 };

@@ -9,7 +9,10 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="taskmanagementsystem-frontend-client\src\utils\" />
-    <Folder Include="taskmanagementsystem-frontend-client\src\services\" />
+    <None Remove="taskmanagementsystem-frontend-client\src\utils\**" />
+    <TypeScriptConfiguration Remove="taskmanagementsystem-frontend-client\src\utils\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="taskmanagementsystem-frontend-client\src\hooks\" />
   </ItemGroup>
 </Project>

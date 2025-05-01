@@ -1,19 +1,17 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'https://localhost:7212/api/auth';
+const API_URL = process.env.REACT_APP_API_URL;
 
-export const registerUser = async (registerData) => {
-    return await axios.post(`${API_URL}/register`, registerData);
-};
-
-export const loginUser = async (loginData) => {
-    const response = await axios.post(`${API_URL}/login`, loginData);
-    if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
+export const login = async (data) => {
+    try {
+        const response = await axios.post("/api/auth/login", data);
+        console.log(response);
+    } catch (error) {
+        console.error(error);
     }
-    return response;
 };
 
-export const logoutUser = () => {
-    localStorage.removeItem('token');
+export const register = async (userData) => {
+    const response = await axios.post(`${API_URL}/api/auth/register`, userData);
+    return response.data;
 };
